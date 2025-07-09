@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>سجل شحناتي</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-button {
+            margin-bottom: 20px;
+            background-color: #519fff;
+            color: #fff;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            display: inline-block;
+        }
+
+        .back-button:hover {
+            background-color: #4179cc;
+        }
+
+        .shipments-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .shipments-table th,
+        .shipments-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .shipments-table th {
+            background-color: #519fff;
+            color: white;
+        }
+
+        h2 {
+            text-align: center;
+            color: green;
+        }
+
+        #shipmentCount {
+            text-align: center;
+            margin: 10px 0;
+            color: green;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="form.html" class="back-button">⬅ رجوع</a>
+
+        <h2>سجل الشحنات الخاصة بك</h2>
+        <div id="shipmentCount"></div>
+
+        <table class="shipments-table" id="shipmentsTable">
+            <thead>
+                <tr>
+                    <th>التاريخ</th>
+                    <th>الاسم</th>
+                    <th>رقم الجوال</th>
+                    <th>المدينة</th>
+                    <th>الحي</th>
+                    <th>الشارع</th>
+                    <th>عدد الطرود</th>
+                    <th>الوزن</th>
+                    <th>نوع الوزن</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- البيانات هنا -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const barcode = sessionStorage.getItem('savedBarcode');
+
+            if (!barcode) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            fetch(`read_shipments.php?barcode=${encodeURIComponent(barcode)}`, {
+                method: 'GET',
+                credentials: 'include'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('tableBody');
+
+                    data.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item['التاريخ'] || ''}</td>
+                            <td>${item['الاسم'] || ''}</td>
+                            <td>${item['رقم الجوال'] || ''}</td>
+                            <td>${item['المدينة'] || ''}</td>
+                            <td>${item['الحي'] || ''}</td>
+                            <td>${item['الشارع'] || ''}</td>
+                            <td>${item['عدد الطرود'] || ''}</td>
+                            <td>${item['الوزن'] || ''}</td>
+                            <td>${item['نوع الوزن'] || ''}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+
+                    document.getElementById('shipmentCount').innerText = `عدد الشحنات: ${data.length}`;
+                })
+                .catch(error => {
+                    console.error('خطأ في جلب البيانات:', error);
+                });
+        });
+    </script>
+</body>
+
+</html>

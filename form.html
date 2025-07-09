@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>نموذج الشحن - نسري</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.png" type="image/png">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        .action-button {
+            background-color: #519fff;
+            color: white;
+            padding: 64px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 35px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .action-button:hover {
+            background-color: #4179cc;
+        }
+
+        .logout-top {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .logout-small-btn {
+            background-color: #e52a2a;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .logout-small-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div id="welcomeMsg"></div>
+
+        <div class="logout-top">
+            <button type="button" id="logout" class="logout-small-btn">خروج</button>
+        </div>
+        <div id="buttonlist" style="text-align:center; margin-bottom: 20px;">
+            <button type="button" id="viewShipments" class="action-button">عرض الشحنات السابقة</button>
+            <button type="button" id="showForm" class="action-button">تعبئة بيانات الشحن</button>
+        </div>
+
+        <form id="shippingForm" style="display: none;">
+            <div class="section-block">
+                <div class="section-title">بيانات المرسل إليه</div>
+                <input type="text" name="الاسم" placeholder="الاسم" required>
+                <div class="row">
+                    <input type="text" name="رقم الجوال" placeholder="رقم الجوال" required>
+                    <input type="text" name="المدينة" placeholder="المدينة" required>
+                </div>
+                <div class="row">
+                    <input type="text" name="الحي" placeholder="الحي" required>
+                    <input type="text" name="الشارع" placeholder="الشارع" required>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-title">تفاصيل الشحنة</div>
+                <input type="number" name="عدد الطرود" placeholder="عدد الطرود" required>
+                <div class="weight-group">
+                    <input type="number" name="الوزن" placeholder="الوزن" required>
+                    <div class="unit-switch">
+                        <input type="radio" id="kg" name="نوع الوزن" value="كيلوجرام" checked>
+                        <label for="kg" class="unit-btn">Kg</label>
+                        <input type="radio" id="g" name="نوع الوزن" value="جرام">
+                        <label for="g" class="unit-btn">g</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="g-recaptcha" data-sitekey="6LeMiVQrAAAAAKtiT1DJcih5Rohp_3k-vyAWyvhA"></div>
+            <button type="submit" id="submitButton">إرسال</button>
+        </form>
+
+        <div id="toast" class="toast" style="display:none;">تم الإرسال بنجاح!</div>
+    </div>
+
+    <script>
+        function showToast(msg) {
+            var t = document.getElementById("toast");
+            t.innerText = msg;
+            t.style.display = "block";
+            setTimeout(() => { t.style.display = "none"; }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var name = sessionStorage.getItem('savedName');
+            var code = sessionStorage.getItem('savedCode');
+
+            if (!name || !code) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            fetch('get_username.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name, code: code })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.barcode) {
+                    sessionStorage.setItem('savedBarcode', result.barcode);
+                }
+            });
+
+            document.getElementById("welcomeMsg").innerHTML =
+                "<span class='hello'>مرحباً</span> " +
+                "<span class='user'>" + name + "</span>";
+            document.getElementById("welcomeMsg").style.display = "block";
+
+            window.currentUserName = name;
+            window.currentUserCode = code;
+
+            document.getElementById('viewShipments').onclick = function () {
+                window.location.href = 'my-shipments.html';
+            };
+
+            document.getElementById('showForm').onclick = function () {
+                const form = document.getElementById('shippingForm');
+                form.style.display = (form.style.display === "none") ? "block" : "none";
+                form.scrollIntoView({ behavior: "smooth" });
+            };
+
+            document.getElementById('logout').onclick = function () {
+                sessionStorage.clear();
+                window.location.href = 'login.html';
+            };
+        });
+
+        document.getElementById('shippingForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            var submitButton = document.getElementById('submitButton');
+            submitButton.disabled = true;
+            submitButton.innerText = "جاري الإرسال...";
+
+            let response = grecaptcha.getResponse();
+            if (response.length === 0) {
+                alert('يرجى التحقق من أنك لست روبوت.');
+                submitButton.disabled = false;
+                submitButton.innerText = "إرسال";
+                return;
+            }
+
+            const formData = new FormData(this);
+            let message = '🚚 تفاصيل الشحنة:\n\n';
+            let dataObj = {};
+            formData.forEach((value, key) => {
+                if (key !== 'g-recaptcha-response') {
+                    message += `${key}: ${value}\n`;
+                }
+                dataObj[key] = value;
+            });
+
+            if (window.currentUserCode) {
+                dataObj['user_code'] = window.currentUserCode;
+            }
+            if (window.currentUserName) {
+                dataObj['user_name'] = window.currentUserName;
+            }
+
+            dataObj['barcode'] = sessionStorage.getItem('savedBarcode');
+
+            fetch('save_shipment.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dataObj)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.ok) {
+                    fetch('telegram_send.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: message, user_code: window.currentUserCode })
+                    })
+                    .then(response => response.json())
+                    .then(() => {
+                        document.getElementById('shippingForm').reset();
+                        grecaptcha.reset();
+                        showToast('تم الإرسال بنجاح!');
+                        submitButton.disabled = false;
+                        submitButton.innerText = "إرسال";
+                    });
+                } else {
+                    alert("حدث خطأ أثناء حفظ الشحنة:\n" + result.error);
+                    submitButton.disabled = false;
+                    submitButton.innerText = "إرسال";
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('فشل الاتصال بالخادم.');
+                submitButton.disabled = false;
+                submitButton.innerText = "إرسال";
+            });
+        });
+    </script>
+</body>
+
+</html>

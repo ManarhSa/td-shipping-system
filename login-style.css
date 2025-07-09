@@ -1,0 +1,145 @@
+/* خلفية الصفحة */
+.login-body {
+    background: url('background.png') no-repeat center center fixed;
+    background-size: cover;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* الكونتينر */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* صندوق تسجيل الدخول */
+.login-box {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 40px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    width: 350px;
+    text-align: center;
+}
+
+/* العنوان */
+.login-title {
+    margin-bottom: 30px;
+    font-size: 42px;
+    color: #ffffff;
+}
+
+/* مجموعة الإدخال */
+.login-input-group {
+    position: relative;
+    margin-bottom: 20px;
+}input#rememberCode {
+    width: 15px;
+    height: 15px;
+}
+
+/* أيقونات الإدخال */
+.login-icon {
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    transform: translateY(-50%);
+    color: #ffffff;
+    font-size: 1.2em;
+}
+
+/* الحقول */
+.login-input {
+    width: 100%;
+    padding: 15px 15px 15px 45px;
+    box-sizing: border-box;
+    border: 1px solid #ffffff5e;
+    border-radius: 50px;
+    font-size: 16px;
+    margin: 10px 0;
+    background: rgb(255 255 255 / 28%);
+    color: #ffffff;
+}
+
+.login-input::placeholder {
+    color: #ffffff;
+    /* لون الـ placeholder */
+}
+
+/* لون البورد عند التركيز */
+.login-input:focus {
+    border-color: #0056b3;
+    /* أزرق غامق */
+    outline: none;
+}
+
+/* خيار تذكرني */
+.login-remember {
+    display: block;
+    margin: 10px 0;
+    font-size: 23px;
+    color: #ffffff;
+}
+
+/* زر تسجيل الدخول */
+.login-button {
+    background-color: #ffffff;
+    color: #000000;
+    padding: 11px;
+    border: none;
+    border-radius: 40px;
+    width: 100%;
+    font-size: 1.5em;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background 0.3s;
+}
+
+.login-button:hover {
+    background-color: #fafafa;
+}
+
+/* رسالة الخطأ */
+.login-error {
+    margin-top: 15px;
+    color: #ff4d4d;
+    font-weight: bold;
+}
+
+/* استجابة للموبايل */
+@media (max-width: 600px),
+(max-width: 700px) {
+    .login-body {
+        padding: 10px;
+        margin: 0;
+    }
+
+    .login-container {
+        max-width: 100vw;
+        border-radius: 0;
+        box-shadow: none;
+        margin: 0;
+        padding: 10px 0 0 0;
+    }
+
+    .login-title {
+        font-size: 2.3em;
+        margin-bottom: 16px;
+    }
+
+    .login-input {
+        font-size: 1em;
+        padding: 12px 6px 12px 45px;
+        border-radius: 7px;
+    }
+
+    .login-button {
+        font-size: 1em;
+        padding: 12px 6px;
+    }
+}
